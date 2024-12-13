@@ -75,6 +75,30 @@ class ResultWindow(wx.Dialog):
         if event.GetKeyCode() == wx.WXK_ESCAPE:
             self.Close()
         event.Skip()
+class InputText(wx.Dialog):
+    def __init__(self):
+        super().__init__(None,-1,title=_("input text"))
+        sizer=wx.BoxSizer(wx.VERTICAL)
+        panel=wx.Panel(self)
+        self.textBox=wx.TextCtrl(panel,-1,style=wx.TE_MULTILINE|wx.TE_RICH)
+        sizer.Add(self.textBox)
+        self.translate=wx.Button(panel,-1,_("translate"))
+        sizer.Add(self.translate)
+        panel.SetSizer(sizer)
+        self.Bind(wx.EVT_BUTTON,self.onTranslate)
+        self.Show()
+    def onOutputKeyDown(self, event):
+        if event.GetKeyCode() == wx.WXK_ESCAPE:
+            self.Close()
+        event.Skip()
+    def onTranslate(self,event):
+        try:
+            result=translate(self.textBox.Value)
+        except Exception as e:
+            result=_("error ") + str(e)
+        self.Destroy()
+        ResultWindow(result,_("translation result"))
+
 class AITranslaterSettingsPanel(SettingsPanel):
     title = _("AI translater")
     def makeSettings(self, settingsSizer):
@@ -155,6 +179,10 @@ class AITranslaterSettingsPanel(SettingsPanel):
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
     scriptCategory= _("AI translater")
     NVDASettingsDialog.categoryClasses.append(AITranslaterSettingsPanel)
+    @script(gesture="kb:NVDA+alt+t")
+    def script_textInput(self,gesture):
+        InputText()
+    script_textInput.__doc__= _("open translation window")
     @script(gesture="kb:NVDA+alt+c")
     def script_hi (self, gesture):
         try:
