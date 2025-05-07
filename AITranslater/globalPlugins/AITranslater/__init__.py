@@ -4,19 +4,43 @@ import wx
 import gui
 import globalPluginHandler
 import ui
+import speech
 import requests
 import api
 from scriptHandler import script
 import addonHandler
-addonHandler.initTranslation()
+from logHandler import log
 
+try:
+    addonHandler.initTranslation()
+except addonHandler.AddonError:
+    log.warning("Unable to init translations. This may be because the addon is running from NVDA scratchpad.")
+
+speak= speech.speech.speak
 roleSECTION = "AITranslater"
 confspec = {
-"translateTo": "string(default=German Germany)",
-"model": "integer(default=0)"}
+"translateTo": "string(default=English United States)",
+"model": "integer(default=0)",
+"useDialogForResults": "boolean(default=true)"}
 
 config.conf.spec[roleSECTION] = confspec
+
+def get_translation(text: str, announce: bool= True):
+    try:
+        result= translate(text)
+    except Exception as e:
+        result=_("{error}\n") + str(e)
+    if not announce:
+        return result
+    if config.conf[roleSECTION]["useDialogForResults"]:
+        ResultWindow(result,_("translation result"))
+    else:
+        speak([result])
+    return result
 def translate(text:str):
+    if not isinstance(text, str):
+        speak([_("Invalid input: not text.")])
+        return
     prompt=f"""translate: 
         {text}
         to {config.conf[roleSECTION]["translateTo"]}
@@ -53,7 +77,7 @@ def translate(text:str):
         elif path==2:
             result=response.json()['candidates'][0]["content"]["parts"][0]["text"]
     else:
-        result="error"
+        result="{error}"
     return result
 
 class ResultWindow(wx.Dialog):
@@ -73,8 +97,9 @@ class ResultWindow(wx.Dialog):
 
     def onOutputKeyDown(self, event):
         if event.GetKeyCode() == wx.WXK_ESCAPE:
-            self.Close()
-        event.Skip()
+            self.Destroy()
+        else:
+            event.Skip()
 class InputText(wx.Dialog):
     def __init__(self):
         super().__init__(None,-1,title=_("input text"))
@@ -83,21 +108,19 @@ class InputText(wx.Dialog):
         self.textBox=wx.TextCtrl(panel,-1,style=wx.TE_MULTILINE|wx.TE_RICH)
         sizer.Add(self.textBox)
         self.translate=wx.Button(panel,-1,_("translate"))
+        self.translate.Bind(wx.EVT_BUTTON,self.onTranslate)
         sizer.Add(self.translate)
+        self.close= wx.Button(panel,-1,_("close"))
+        self.close.Bind(wx.EVT_BUTTON,self.onClose)
+        sizer.Add(self.close)
         panel.SetSizer(sizer)
-        self.Bind(wx.EVT_BUTTON,self.onTranslate)
         self.Show()
-    def onOutputKeyDown(self, event):
-        if event.GetKeyCode() == wx.WXK_ESCAPE:
-            self.Close()
-        event.Skip()
-    def onTranslate(self,event):
-        try:
-            result=translate(self.textBox.Value)
-        except Exception as e:
-            result=_("error ") + str(e)
+    def onClose(self,event):
         self.Destroy()
-        ResultWindow(result,_("translation result"))
+    def onTranslate(self,event):
+        text= self.textBox.Value
+        self.close.SetFocus()
+        get_translation(text)
 
 class AITranslaterSettingsPanel(SettingsPanel):
     title = _("AI translater")
@@ -163,33 +186,56 @@ class AITranslaterSettingsPanel(SettingsPanel):
     "Urdu India"
 ]
         languages.sort()
-        self.tlable = sHelper.addItem(wx.StaticText(self, label=_("model"), name="ts"))
+        self.tlable = sHelper.addItem(wx.StaticText(self, label=_("&model"), name="ts"))
         self.sou= sHelper.addItem(wx.Choice(self, name="ts"))
         self.sou.Set(["chatgpt","llama","gemini"])
-        self.tlable1 = sHelper.addItem(wx.StaticText(self, label=_("translate to"), name="ts1"))
+        self.tlable1 = sHelper.addItem(wx.StaticText(self, label=_("trans&late to"), name="ts1"))
         self.sou1= sHelper.addItem(wx.Choice(self, name="ts1"))
         self.sou1.Set(languages)
         self.sou.SetSelection(config.conf[roleSECTION]["model"])
         self.sou1.SetStringSelection(config.conf[roleSECTION]["translateTo"])
+        self.sou2 = sHelper.addItem(wx.CheckBox(self, label=_("use &dialog for results"), name="ts2"))
+        self.sou2.SetValue(config.conf[roleSECTION]["useDialogForResults"])
     def postInit(self):
         self.sou.SetFocus()
     def onSave(self):
         config.conf[roleSECTION]["model"]=self.sou.Selection
         config.conf[roleSECTION]["translateTo"]=self.sou1.StringSelection
+        config.conf[roleSECTION]["useDialogForResults"]=self.sou2.Value
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        speech.speech.speak= self.speech_event
+        self.record_live_speech= False
     scriptCategory= _("AI translater")
     NVDASettingsDialog.categoryClasses.append(AITranslaterSettingsPanel)
+    def speech_event(self, sequence, *args, **kwargs):
+        if self.record_live_speech:
+            text_blocks= [i for i in range(len(sequence)) if isinstance(sequence[i], (str, int, float, bool, None)) and len(sequence[i])>1 and not sequence[i].isspace()]
+            if len(text_blocks)>0:
+                result= get_translation("|  ".join([str(sequence[i]) for i in text_blocks]), False)
+                if result.startswith("{error}"):
+                    self.record_live_speech= False
+                result= result.split("|  ")
+                for i in range(len(text_blocks)):
+                    sequence[text_blocks[i]]= result[i]
+        speak(sequence, *args, **kwargs)
     @script(gesture="kb:NVDA+alt+t")
     def script_textInput(self,gesture):
+        self.record_live_speech= False
         InputText()
     script_textInput.__doc__= _("open translation window")
     @script(gesture="kb:NVDA+alt+c")
-    def script_hi (self, gesture):
-        try:
-            result=translate(api.getClipData())
-        except Exception as e:
-            result=_("error ") + str(e)
-        ResultWindow(result,_("translation result"))
-    script_hi.__doc__= _("Translates clipboard text ")
+    def script_text_clipboard (self, gesture):
+        self.record_live_speech= False
+        get_translation(api.getClipData())
+    script_text_clipboard.__doc__= _("Translates clipboard text ")
+    @script(gesture="kb:NVDA+alt+r")
+    def script_live_recording (self, gesture):
+        self.record_live_speech= not self.record_live_speech
+        speak([("En" if self.record_live_speech else "Dis")+ "abled recording."])
+    script_live_recording.__doc__= _("Toggles translation of live text ")
     def terminate(self):
+        self.record_live_speech= False
+        speech.speech.speak= speak
         NVDASettingsDialog.categoryClasses.remove(AITranslaterSettingsPanel)
