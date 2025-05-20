@@ -20,7 +20,7 @@ speak= speech.speech.speak
 roleSECTION = "AITranslater"
 confspec = {
 "translateTo": "string(default=English United States)",
-"model": "integer(default=0)",
+"model": "integer(default=3)",
 "useDialogForResults": "boolean(default=true)"}
 
 config.conf.spec[roleSECTION] = confspec
@@ -45,41 +45,28 @@ def translate(text:str):
         {text}
         to {config.conf[roleSECTION]["translateTo"]}
         give me the translated text only don't type any things except the text"""
-
-    apiLlama="LL-7GSSOuFGJRrDTxot9HwuANRqUqFchg1cjchgx9qTehfksBKp9OIei0JQoLnVpHKs"
-    apiGemini="AIzaSyDYeLxp7Jp5qSypbVBPy9v_XYmz7Sc1qfs"
     model=config.conf[roleSECTION]["model"]
-    if model==0:
-        response=requests.get("https://darkness.ashlynn.workers.dev/chat/?model=gpt-4o-mini&prompt=" + prompt.replace(" ","%22"))
-        path=0
-    elif model==1:
-        api_request_json = {
-  "model": "llama3.1-405b",
-"max_tokens":3000,
-  "messages": [
-    {"role": "user", "content": prompt},
-  ]
-}
-        response=requests.post("https://api.llama-api.com/chat/completions",headers={'Authorization': 'Bearer ' + apiLlama,'Content-Type': 'application/json',},json=api_request_json)
-        path=1
-    elif model==2:
-        headrs={
-            'Content-Type':'application/json',
-        }
-        data={"contents":[{"parts":[{"text":prompt}]}]}
-        response=requests.post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + apiGemini,headers=headrs,json=data)
-        path=2
-    if response.status_code==200:
-        if path==0:
-            result=response.json()["response"]
-        elif path==1:
-            result=response.json()["choices"][0]["message"]["content"]
-        elif path==2:
-            result=response.json()['candidates'][0]["content"]["parts"][0]["text"]
-    else:
-        result="{error}"
-    return result
-
+    endpoints = [
+        f"https://blackbox-pro.bjcoderx.workers.dev/?q={prompt}",
+        f"https://bj-copilot-microsoft.vercel.app/?text={prompt}",
+        f"https://gpt-3-5.apis-bj-devs.workers.dev/?prompt=Hello?text={prompt}",
+        f"https://gemini-1-5-flash.bjcoderx.workers.dev/?text={prompt}"
+    ]
+    try:
+        response = requests.get(endpoints[model])
+        data = response.json()
+        if model == 0:
+            return data["data"]["result"]
+        elif model == 1:
+            return data["answer"]
+        elif model == 2:
+            return data["reply"]
+        elif model == 3:
+            return data["text"]
+        else:
+            return "Invalid model index."
+    except Exception as e:
+        return f"Error: {str(e)}"
 class ResultWindow(wx.Dialog):
     def __init__(self, text, title):
         super(ResultWindow, self).__init__(gui.mainFrame, title=title)
@@ -127,68 +114,74 @@ class AITranslaterSettingsPanel(SettingsPanel):
     def makeSettings(self, settingsSizer):
         sHelper = guiHelper.BoxSizerHelper(self, sizer=settingsSizer)
         languages = [
-    "English United States",
-    "English United Kingdom",
+    "Arabic Egypt",
+    "Arabic Levantine",
+    "Arabic Saudi Arabia",
+    "Arabic Standard",
+    "Bengali Bangladesh",
+    "Bengali India",
+    "Chinese Cantonese",
+    "Chinese Mandarin (Simplified)",
+    "Chinese Mandarin (Traditional)",
+    "Czech Czech Republic",
+    "Danish Denmark",
+    "Dutch Belgium",
+    "Dutch Netherlands",
     "English Australia",
     "English Canada",
     "English India",
-    "Spanish Spain",
-    "Spanish Mexico",
-    "Spanish Argentina",
-    "Spanish Colombia",
-    "Spanish United States",
-    "French France",
-    "French Canada",
+    "English United Kingdom",
+    "English United States",
+    "Finnish Finland",
     "French Belgium",
+    "French Canada",
+    "French France",
     "French Switzerland",
-    "Portuguese Portugal",
-    "Portuguese Brazil",
-    "German Germany",
     "German Austria",
+    "German Germany",
     "German Switzerland",
-    "Arabic Standard",
-    "Arabic Egypt",
-    "Arabic Saudi Arabia",
-    "Arabic Levantine",
-    "Chinese Mandarin (Simplified)",
-    "Chinese Mandarin (Traditional)",
-    "Chinese Cantonese",
-    "Dutch Netherlands",
-    "Dutch Belgium",
-    "Russian Russia",
+    "Greek Greece",
+    "Hebrew Israel",
+    "Hindi India",
+    "Hungarian Hungary",
+    "Indonesian Indonesia",
     "Italian Italy",
     "Italian Switzerland",
     "Japanese Japan",
     "Korean South Korea",
-    "Hindi India",
-    "Swedish Sweden",
-    "Norwegian Norway",
-    "Danish Denmark",
-    "Finnish Finland",
-    "Greek Greece",
-    "Turkish Turkey",
-    "Polish Poland",
-    "Hebrew Israel",
-    "Indonesian Indonesia",
-    "Malay Malaysia",
     "Malay Brunei",
-    "Thai Thailand",
-    "Vietnamese Vietnam",
-    "Bengali Bangladesh",
-    "Bengali India",
+    "Malay Malaysia",
+    "Marathi India",
+    "Norwegian Norway",
+    "Persian Iran",
+    "Polish Poland",
+    "Portuguese Brazil",
+    "Portuguese Portugal",
     "Punjabi India",
     "Punjabi Pakistan",
+    "Romanian Romania",
+    "Russian Russia",
+    "Slovak Slovakia",
+    "Spanish Argentina",
+    "Spanish Colombia",
+    "Spanish Mexico",
+    "Spanish Spain",
+    "Spanish United States",
+    "Swedish Sweden",
     "Tamil India",
     "Tamil Sri Lanka",
     "Telugu India",
-    "Marathi India",
+    "Thai Thailand",
+    "Turkish Turkey",
+    "Ukrainian Ukraine",
+    "Urdu India",
     "Urdu Pakistan",
-    "Urdu India"
+    "Vietnamese Vietnam"
 ]
         languages.sort()
         self.tlable = sHelper.addItem(wx.StaticText(self, label=_("&model"), name="ts"))
         self.sou= sHelper.addItem(wx.Choice(self, name="ts"))
-        self.sou.Set(["chatgpt","llama","gemini"])
+        self.sou.Set([    "proAI",    "Microsoft Copilot",    "ChatGPT",    "Gemini"])
         self.tlable1 = sHelper.addItem(wx.StaticText(self, label=_("trans&late to"), name="ts1"))
         self.sou1= sHelper.addItem(wx.Choice(self, name="ts1"))
         self.sou1.Set(languages)
@@ -207,13 +200,15 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         super().__init__(*args, **kwargs)
         speech.speech.speak= self.speech_event
         self.record_live_speech= False
+        self.lastSpoken=""
     scriptCategory= _("AI translater")
     NVDASettingsDialog.categoryClasses.append(AITranslaterSettingsPanel)
     def speech_event(self, sequence, *args, **kwargs):
+        text_blocks = [    i for i in range(len(sequence))    if isinstance(sequence[i], (str, int, float, bool, type(None)))    and len(str(sequence[i])) > 1    and not str(sequence[i]).isspace()]
+        self.lastSpoken="|  ".join([str(sequence[i]) for i in text_blocks])
         if self.record_live_speech:
-            text_blocks= [i for i in range(len(sequence)) if isinstance(sequence[i], (str, int, float, bool, None)) and len(sequence[i])>1 and not sequence[i].isspace()]
             if len(text_blocks)>0:
-                result= get_translation("|  ".join([str(sequence[i]) for i in text_blocks]), False)
+                result= get_translation(self.lastSpoken, False)
                 if result.startswith("{error}"):
                     self.record_live_speech= False
                 result= result.split("|  ")
@@ -235,6 +230,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         self.record_live_speech= not self.record_live_speech
         speak([("En" if self.record_live_speech else "Dis")+ "abled recording."])
     script_live_recording.__doc__= _("Toggles translation of live text ")
+    @script()
+    def script_lastSpoken(self, gesture):
+        self.record_live_speech= False
+        if self.lastSpoken=="":
+            return
+        get_translation(self.lastSpoken)
+    script_lastSpoken.__doc__= _("translate last spoken text")
     def terminate(self):
         self.record_live_speech= False
         speech.speech.speak= speak
