@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2024-12-13 18:28+0200\n"
+"POT-Creation-Date: 2025-05-21 11:51+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,50 +16,74 @@ msgstr ""
 
 
 #:
-#: D:\windows\folders\Github desktop\AITranslater-nvda-add-on\AITranslater\globalPlugins\AITranslater\__init__.py:80
-msgid "input text"
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:32
+msgid ""
+"{error}\n"
 msgstr ""
 
 #:
-#: D:\windows\folders\Github desktop\AITranslater-nvda-add-on\AITranslater\globalPlugins\AITranslater\__init__.py:85
-msgid "translate"
-msgstr ""
-
-#:
-#: D:\windows\folders\Github desktop\AITranslater-nvda-add-on\AITranslater\globalPlugins\AITranslater\__init__.py:98
-#: D:\windows\folders\Github desktop\AITranslater-nvda-add-on\AITranslater\globalPlugins\AITranslater\__init__.py:191
-msgid "error "
-msgstr ""
-
-#:
-#: D:\windows\folders\Github desktop\AITranslater-nvda-add-on\AITranslater\globalPlugins\AITranslater\__init__.py:100
-#: D:\windows\folders\Github desktop\AITranslater-nvda-add-on\AITranslater\globalPlugins\AITranslater\__init__.py:192
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:36
 msgid "translation result"
 msgstr ""
 
 #:
-#: D:\windows\folders\Github desktop\AITranslater-nvda-add-on\AITranslater\globalPlugins\AITranslater\__init__.py:103
-#: D:\windows\folders\Github desktop\AITranslater-nvda-add-on\AITranslater\globalPlugins\AITranslater\__init__.py:180
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:42
+msgid "Invalid input: not text."
+msgstr ""
+
+#:
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:92
+msgid "input text"
+msgstr ""
+
+#:
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:97
+msgid "translate"
+msgstr ""
+
+#:
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:100
+msgid "close"
+msgstr ""
+
+#:
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:113
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:204
 msgid "AI translater"
 msgstr ""
 
 #:
-#: D:\windows\folders\Github desktop\AITranslater-nvda-add-on\AITranslater\globalPlugins\AITranslater\__init__.py:166
-msgid "model"
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:182
+msgid "&model"
 msgstr ""
 
 #:
-#: D:\windows\folders\Github desktop\AITranslater-nvda-add-on\AITranslater\globalPlugins\AITranslater\__init__.py:169
-msgid "translate to"
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:185
+msgid "trans&late to"
 msgstr ""
 
 #:
-#: D:\windows\folders\Github desktop\AITranslater-nvda-add-on\AITranslater\globalPlugins\AITranslater\__init__.py:185
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:190
+msgid "use &dialog for results"
+msgstr ""
+
+#:
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:222
 msgid "open translation window"
 msgstr ""
 
 #:
-#: D:\windows\folders\Github desktop\AITranslater-nvda-add-on\AITranslater\globalPlugins\AITranslater\__init__.py:193
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:227
 msgid "Translates clipboard text "
+msgstr ""
+
+#:
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:232
+msgid "Toggles translation of live text "
+msgstr ""
+
+#:
+#: C:\Users\anasf\AppData\Roaming\nvda\addons\AITranslater\globalPlugins\AITranslater\__init__.py:239
+msgid "translate last spoken text"
 msgstr ""
 

@@ -44,7 +44,7 @@ def translate(text:str):
     prompt=f"""translate: 
         {text}
         to {config.conf[roleSECTION]["translateTo"]}
-        give me the translated text only don't type any things except the text"""
+        give me the translated text only don't type any things except the text""".replace(" ","%20")
     model=config.conf[roleSECTION]["model"]
     endpoints = [
         f"https://blackbox-pro.bjcoderx.workers.dev/?q={prompt}",
